@@ -3,4 +3,4 @@ http://cwbuecheler.com/web/tutorials/2014/restful-web-app-node-express-mongodb/
 
 ** not including database here (locally set to folder /data/ inside current project)
 
-
+* update_table branch is developing the ability to update someone's information in the database
