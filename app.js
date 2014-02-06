@@ -9,13 +9,26 @@ var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 // database
-var mongo = require('mongoskin');
-var db = mongo.db([
-    'localhost:27017/?auto_reconnect' // location of the db
-    ], {
-        database: 'nodetest2', // name of used db
-        safe: true
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/nodetest2'); // location of the db
+var db = mongoose.connection;
+db.on('error',console.error.bind(console,'connection error: '));
+db.once('open', function callback () {
+    // successful connection code goes here
+
+    // create schema
+    var userSchema = mongoose.Schema({
+        username: String,
+        email: String,
+        fullname: String,
+        age: Number,
+        location: String,
+        gender: String
     });
+
+    // create model from schema
+    var User = mongoose.model('User',userSchema);
+});
 
 
 var app = express();
