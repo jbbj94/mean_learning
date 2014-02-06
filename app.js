@@ -41,6 +41,7 @@ app.get('/', routes.index);
 app.get('/userlist', user.userlist(db)); // for drawing from db
 app.post('/adduser', user.adduser(db)); // for adding to db
 app.delete('/deleteuser/:id',user.deleteuser(db)); // for deleting from database
+app.post('/updateuser/:id',user.updateuser(db)); // for updating someone's info
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

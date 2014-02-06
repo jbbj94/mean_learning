@@ -1,5 +1,7 @@
 // userlist array
 var userListData = [];
+var updateID = []; // id of person getting ready to update
+var user2update = {};
 
 // get DOM ready ======================
 $(document).ready(function() { // when doc is ready...
@@ -13,6 +15,12 @@ $(document).ready(function() { // when doc is ready...
 
     // delete user button click
     $('#userList table tbody').on('click','td a.linkdeleteuser', deleteUser);
+
+    // update user button click
+    $('#userList table tbody').on('click','td a.linkupdateuser', enableUpdateUser);
+    // submit update button click
+    $('#btnUpdateUser').on('click', updateUser);
+
 });
 
 // fcns ======================
@@ -33,6 +41,7 @@ function populateTable() {
             tableContent += '<td><a href="#" class="linkshowuser" rel="' + this.username + '" title="Show Details">' + this.username + '</td>'; // show username
             tableContent += '<td>' + this.email + '</td>'; // show email
             tableContent += '<td><a href="#" class="linkdeleteuser" rel="' + this._id + '">delete</a></td>' // show click2delete
+            tableContent += '<td><a href="#" class="linkupdateuser" rel="' + this._id + '">update</a></td>' // show click2update
 
             // inject content string into existing html
             $('#userList table tbody').html(tableContent);
@@ -118,6 +127,8 @@ function addUser(event) {
 function deleteUser(event){
     event.preventDefault();
 
+    console.log('clicked delete');
+
     // popup confirmation dialogue
     var confirmation = confirm('you sure you want to delete?');
 
@@ -142,4 +153,92 @@ function deleteUser(event){
     else { // if no confirm, do nothing
         return false
     }
+};
+
+
+function enableUpdateUser(event){
+    event.preventDefault();
+
+    // get user name
+    var thisUserID = $(this).attr('rel'); // retreive user id from link rel attribute
+    updateID = thisUserID; // set global id (for submitting update)
+
+    // get user index in array
+    var arrayPosition = userListData.map(function(arrayItem){
+        return arrayItem._id;}
+        ).indexOf(thisUserID);
+
+    var thisUserObject = userListData[arrayPosition];
+    user2update = thisUserObject; // set global object (for submitting update)
+
+    // set defaults for update data entry
+    $('#updateUser fieldset :input[type="text"]:not(#inputUserName)').css('background-color','#FFF');
+    // allow edits to all fields except username
+    $('#updateUser fieldset :input[type="text"]:not(#inputUserName)').attr('readonly',false);
+    $('#updateUser fieldset #btnUpdateUser').prop('disabled',false); // enable submit button
+    // default placeholders
+    $('#updateUser fieldset input#inputUserName').attr('placeholder',thisUserObject.username);
+    $('#updateUser fieldset input#inputUserEmail').attr('placeholder',thisUserObject.email);
+    $('#updateUser fieldset input#inputUserFullname').attr('placeholder',thisUserObject.fullname);
+    $('#updateUser fieldset input#inputUserAge').attr('placeholder',thisUserObject.age);
+    $('#updateUser fieldset input#inputUserLocation').attr('placeholder',thisUserObject.location);
+    $('#updateUser fieldset input#inputUserGender').attr('placeholder',thisUserObject.gender);
+}
+
+function updateUser(event){
+    console.log('clicked update');
+
+    // popup confirmation dialogue
+    var confirmation = confirm('you sure you want to update?');
+
+    // check confirm
+    if(confirmation===true){
+        // if confirmed, delete
+
+        // replace non-empty fields with updated input
+        // * user2update was made in enableUpdateUser
+        if($('#updateUser fieldset input#inputUserEmail').val() !== ''){
+            user2update.email = $('#updateUser fieldset input#inputUserEmail').val();
+        }
+        if($('#updateUser fieldset input#inputUserFullname').val() !== ''){
+            user2update.fullname = $('#updateUser fieldset input#inputUserFullname').val();
+        }
+        if($('#updateUser fieldset input#inputUserAge').val() !== ''){
+            user2update.age = $('#updateUser fieldset input#inputUserAge').val();
+        }
+        if($('#updateUser fieldset input#inputUserLocation').val() !== ''){
+            user2update.location = $('#updateUser fieldset input#inputUserLocation').val();
+        }
+        if($('#updateUser fieldset input#inputUserGender').val() !== ''){
+            user2update.gender = $('#updateUser fieldset input#inputUserGender').val();
+        }
+
+        // console.log(user2update);
+        // console.log(updateID);
+
+        // Use AJAX to post the object to our updateuser service
+        $.ajax({
+          type: 'POST',
+          data: user2update,
+          url: '/updateuser/' + updateID,
+          dataType: 'JSON'
+        }).done(function( response ) {
+
+          // Check for successful (blank) response
+          if (response.msg === '') {
+
+            // Clear the form inputs
+            $('#updateUser fieldset input').val('');
+
+            // Update the table
+            populateTable();
+
+          }
+          else {
+            // If something goes wrong, alert the error message that our service returned
+            console.log('Error:', user2update);
+            alert('Error: ' + response.msg.responseText);
+          }
+        });
+    };
 };

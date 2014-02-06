@@ -30,3 +30,23 @@ exports.deleteuser = function(db) {
             });
     }
 };
+
+
+exports.updateuser = function(db) {
+    return function(req,res) {
+        var userToUpdate = req.params.id;
+        console.log('running update route');
+        console.log(req.body);
+        console.log(userToUpdate);
+
+        console.log(db.collection('userlist').id(userToUpdate));
+
+        db.collection('userlist').update({'_id':db.collection('userlist').id(userToUpdate)}, req.body); //,
+        // function(err, result){
+        //      res.send(
+        //          (err === null) ? {msg: ''} : {msg: err}
+        //      );
+        //  }
+        //  );
+    }
+};
